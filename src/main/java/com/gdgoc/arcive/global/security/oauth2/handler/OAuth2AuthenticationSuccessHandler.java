@@ -1,4 +1,4 @@
-package com.gdgoc.arcive.global.security.oauth2.service;
+package com.gdgoc.arcive.global.security.oauth2.handler;
 
 import com.gdgoc.arcive.domain.member.entity.Role;
 import com.gdgoc.arcive.global.security.dto.TempTokenInfo;

@@ -98,4 +98,11 @@ public class JwtTokenProvider {
 		String role = claims.get("role", String.class);
 		return Role.valueOf(role);
 	}
+
+	// 토큰의 남은 유효시간 반환 (밀리초)
+	public Long getExpiration(String token) {
+		Claims claims = validateToken(token);
+		Date now = new Date();
+		return claims.getExpiration().getTime() - now.getTime();
+	}
 }

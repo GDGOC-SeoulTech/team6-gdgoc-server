@@ -6,7 +6,7 @@ import com.gdgoc.arcive.global.security.jwt.filter.JwtExceptionFilter;
 import com.gdgoc.arcive.global.security.jwt.handler.JwtAccessDeniedHandler;
 import com.gdgoc.arcive.global.security.jwt.handler.JwtAuthenticationEntryPoint;
 import com.gdgoc.arcive.global.security.oauth2.service.CustomOAuth2UserService;
-import com.gdgoc.arcive.global.security.oauth2.service.OAuth2AuthenticationSuccessHandler;
+import com.gdgoc.arcive.global.security.oauth2.handler.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
