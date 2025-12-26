@@ -2,6 +2,7 @@ package com.gdgoc.arcive.global.exception;
 
 import com.gdgoc.arcive.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,5 +20,15 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(ApiResponse.failure(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        log.warn("[!] Global Exception: {}", e);
+
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        return ResponseEntity.internalServerError()
+                .body(ApiResponse.failure(String.valueOf(status.value()), status.getReasonPhrase()));
     }
 }
