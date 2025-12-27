@@ -4,6 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum SocialType {
-    GOOGLE
+    GOOGLE;
+
+    public static SocialType getSocialType(String registrationId) {
+        return SocialType.valueOf(registrationId.toUpperCase());
+    }
 }
 
