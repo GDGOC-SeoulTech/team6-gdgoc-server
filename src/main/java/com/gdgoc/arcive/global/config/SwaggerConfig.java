@@ -10,7 +10,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -26,9 +25,20 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class SwaggerConfig {
 
+    private static final String SECURITY_SCHEME_NAME = "JWT";
+
     @Bean
     public OpenAPI openAPI() {
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList(SECURITY_SCHEME_NAME);
+        Components components = new Components()
+                .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme()
+                        .name(SECURITY_SCHEME_NAME)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("Bearer")
+                        .bearerFormat(SECURITY_SCHEME_NAME));
 
-        return new OpenAPI();
+        return new OpenAPI()
+                .addSecurityItem(securityRequirement)
+                .components(components);
     }
 }

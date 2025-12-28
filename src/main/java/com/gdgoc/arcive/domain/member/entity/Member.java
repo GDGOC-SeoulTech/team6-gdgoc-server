@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,4 +36,12 @@ public class Member extends BaseEntity {
 
     @Column(nullable = false)
     private String email;
+
+    @Builder
+    public Member(Role role, SocialType socialType, String socialId, String email) {
+        this.role = role;
+        this.socialType = socialType;
+        this.socialId = socialId;
+        this.email = email;
+    }
 }
