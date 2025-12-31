@@ -11,12 +11,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Project extends BaseEntity {
 
     @Id
@@ -39,5 +43,22 @@ public class Project extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "activity_id", nullable = false)
     private Activity activity;
+
+    // 프로젝트 수정 메서드
+    public void updateProject(String projectName, int generation, String description, String imageUrl, Activity activity) {
+        if (projectName != null) {
+            this.projectName = projectName;
+        }
+        this.generation = generation;
+        if (description != null) {
+            this.description = description;
+        }
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+        if (activity != null) {
+            this.activity = activity;
+        }
+    }
 }
 

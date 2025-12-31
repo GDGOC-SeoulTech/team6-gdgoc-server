@@ -1,5 +1,9 @@
 package com.gdgoc.arcive.domain.admin.service;
 
+import com.gdgoc.arcive.domain.activity.entity.Activity;
+import com.gdgoc.arcive.domain.activity.exception.ActivityErrorCode;
+import com.gdgoc.arcive.domain.activity.exception.ActivityException;
+import com.gdgoc.arcive.domain.activity.repository.ActivityRepository;
 import com.gdgoc.arcive.domain.member.dto.MemberResponse;
 import com.gdgoc.arcive.domain.member.dto.UpdateMemberRoleRequest;
 import com.gdgoc.arcive.domain.member.entity.Member;
@@ -7,6 +11,13 @@ import com.gdgoc.arcive.domain.member.entity.Role;
 import com.gdgoc.arcive.domain.member.exception.MemberErrorCode;
 import com.gdgoc.arcive.domain.member.exception.MemberException;
 import com.gdgoc.arcive.domain.member.repository.MemberRepository;
+import com.gdgoc.arcive.domain.project.dto.CreateProjectRequest;
+import com.gdgoc.arcive.domain.project.dto.ProjectResponse;
+import com.gdgoc.arcive.domain.project.dto.UpdateProjectRequest;
+import com.gdgoc.arcive.domain.project.entity.Project;
+import com.gdgoc.arcive.domain.project.exception.ProjectErrorCode;
+import com.gdgoc.arcive.domain.project.exception.ProjectException;
+import com.gdgoc.arcive.domain.project.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +30,8 @@ import java.util.List;
 public class AdminService {
 
     private final MemberRepository memberRepository;
+    private final ProjectRepository projectRepository;
+    private final ActivityRepository activityRepository;
 
     /**
      * 가입 사용자 목록 조회 (승인 대기 포함)
@@ -50,6 +63,62 @@ public class AdminService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         
         member.updateRole(request.role());
+    }
+
+    /**
+     * 프로젝트 등록
+     */
+    @Transactional
+    public ProjectResponse createProject(CreateProjectRequest request) {
+        Activity activity = activityRepository.findById(request.activityId())
+                .orElseThrow(() -> new ActivityException(ActivityErrorCode.ACTIVITY_NOT_FOUND));
+
+        Project project = Project.builder()
+                .projectName(request.projectName())
+                .generation(request.generation())
+                .description(request.description())
+                .imageUrl(request.imageUrl())
+                .activity(activity)
+                .build();
+
+        Project savedProject = projectRepository.save(project);
+        return ProjectResponse.from(savedProject);
+    }
+
+    /**
+     * 프로젝트 수정
+     */
+    @Transactional
+    public ProjectResponse updateProject(Long projectId, UpdateProjectRequest request) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectException(ProjectErrorCode.PROJECT_NOT_FOUND));
+
+        Activity activity = null;
+        if (request.activityId() != null) {
+            activity = activityRepository.findById(request.activityId())
+                    .orElseThrow(() -> new ActivityException(ActivityErrorCode.ACTIVITY_NOT_FOUND));
+        }
+
+        project.updateProject(
+                request.projectName(),
+                request.generation() != null ? request.generation() : project.getGeneration(),
+                request.description(),
+                request.imageUrl(),
+                activity
+        );
+
+        return ProjectResponse.from(project);
+    }
+
+    /**
+     * 프로젝트 삭제
+     */
+    @Transactional
+    public void deleteProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectException(ProjectErrorCode.PROJECT_NOT_FOUND));
+
+        projectRepository.delete(project);
     }
 }
 
