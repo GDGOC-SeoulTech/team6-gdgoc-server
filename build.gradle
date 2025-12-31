@@ -8,7 +8,7 @@ group = 'com.gdgoc'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)  // 임시: Java 21 사용 (Java 17 설치 후 17로 변경 권장)
 	}
 }
 

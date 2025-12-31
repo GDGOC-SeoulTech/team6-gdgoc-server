@@ -31,7 +31,7 @@ public record MemberResponse(
                 member.getId(),
                 member.getEmail(),
                 member.getRole(),
-                member.getSocialType().name(),
+                member.getSocialType() != null ? member.getSocialType().name() : null,
                 member.getCreatedAt(),
                 member.getUpdatedAt()
         );

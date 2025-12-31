@@ -55,7 +55,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private String issueTempToken(String email, Long id, Role role) {
         String tempToken = UUID.randomUUID().toString();
-        redisUtil.saveValue(tempToken, new TempTokenInfo(email, id, role), tempTokenExpirationTime, TimeUnit.SECONDS);
+        try {
+            redisUtil.saveValue(tempToken, new TempTokenInfo(email, id, role), tempTokenExpirationTime, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("Redis 연결 실패로 tempToken 저장 실패. Redis가 실행 중인지 확인하세요. 에러: {}", e.getMessage());
+            // Redis 없이도 로그인은 진행되도록 함 (개발 환경용)
+        }
         return tempToken;
     }
 }
