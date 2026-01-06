@@ -3,6 +3,9 @@ package com.gdgoc.arcive.domain.admin.controller;
 import com.gdgoc.arcive.domain.admin.service.AdminService;
 import com.gdgoc.arcive.domain.member.dto.MemberResponse;
 import com.gdgoc.arcive.domain.member.dto.UpdateMemberRoleRequest;
+import com.gdgoc.arcive.domain.notification.dto.DiscordNotificationLogResponse;
+import com.gdgoc.arcive.domain.part.dto.PartResponse;
+import com.gdgoc.arcive.domain.part.dto.UpdatePartRequest;
 import com.gdgoc.arcive.domain.project.dto.CreateProjectRequest;
 import com.gdgoc.arcive.domain.project.dto.ProjectResponse;
 import com.gdgoc.arcive.domain.project.dto.UpdateProjectRequest;
@@ -75,6 +78,27 @@ public class AdminController {
             @PathVariable Long projectId) {
         adminService.deleteProject(projectId);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @Operation(summary = "파트 소개 목록 조회 [대훈]", description = "모든 파트 목록을 조회합니다.")
+    @GetMapping("/parts")
+    public ResponseEntity<ApiResponse<List<PartResponse>>> getAllParts() {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getAllParts()));
+    }
+
+    @Operation(summary = "파트 소개 수정 [대훈]", description = "파트 정보를 수정합니다.")
+    @PatchMapping("/parts/{partId}")
+    public ResponseEntity<ApiResponse<PartResponse>> updatePart(
+            @Parameter(description = "파트 ID", example = "1")
+            @PathVariable Long partId,
+            @Valid @RequestBody UpdatePartRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.updatePart(partId, request)));
+    }
+
+    @Operation(summary = "Discord 알림 전송 로그 조회 [대훈]", description = "Discord 알림 전송 로그 목록을 최신순으로 조회합니다.")
+    @GetMapping("/notifications/discord")
+    public ResponseEntity<ApiResponse<List<DiscordNotificationLogResponse>>> getDiscordNotificationLogs() {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getDiscordNotificationLogs()));
     }
 }
 

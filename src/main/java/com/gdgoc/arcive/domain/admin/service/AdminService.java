@@ -7,7 +7,6 @@ import com.gdgoc.arcive.domain.activity.repository.ActivityRepository;
 import com.gdgoc.arcive.domain.member.dto.MemberResponse;
 import com.gdgoc.arcive.domain.member.dto.UpdateMemberRoleRequest;
 import com.gdgoc.arcive.domain.member.entity.Member;
-import com.gdgoc.arcive.domain.member.entity.Role;
 import com.gdgoc.arcive.domain.member.exception.MemberErrorCode;
 import com.gdgoc.arcive.domain.member.exception.MemberException;
 import com.gdgoc.arcive.domain.member.repository.MemberRepository;
@@ -15,6 +14,15 @@ import com.gdgoc.arcive.domain.project.dto.CreateProjectRequest;
 import com.gdgoc.arcive.domain.project.dto.ProjectResponse;
 import com.gdgoc.arcive.domain.project.dto.UpdateProjectRequest;
 import com.gdgoc.arcive.domain.project.entity.Project;
+import com.gdgoc.arcive.domain.part.dto.PartResponse;
+import com.gdgoc.arcive.domain.part.dto.UpdatePartRequest;
+import com.gdgoc.arcive.domain.part.entity.Part;
+import com.gdgoc.arcive.domain.part.exception.PartErrorCode;
+import com.gdgoc.arcive.domain.notification.dto.DiscordNotificationLogResponse;
+import com.gdgoc.arcive.domain.notification.entity.DiscordNotificationLog;
+import com.gdgoc.arcive.domain.notification.repository.DiscordNotificationLogRepository;
+import com.gdgoc.arcive.domain.part.exception.PartException;
+import com.gdgoc.arcive.domain.part.repository.PartRepository;
 import com.gdgoc.arcive.domain.project.exception.ProjectErrorCode;
 import com.gdgoc.arcive.domain.project.exception.ProjectException;
 import com.gdgoc.arcive.domain.project.repository.ProjectRepository;
@@ -32,6 +40,8 @@ public class AdminService {
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
     private final ActivityRepository activityRepository;
+    private final PartRepository partRepository;
+    private final DiscordNotificationLogRepository discordNotificationLogRepository;
 
     /**
      * 가입 사용자 목록 조회 (승인 대기 포함)
@@ -119,6 +129,39 @@ public class AdminService {
                 .orElseThrow(() -> new ProjectException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
         projectRepository.delete(project);
+    }
+
+    /**
+     * 파트 목록 조회
+     */
+    public List<PartResponse> getAllParts() {
+        List<Part> parts = partRepository.findAll();
+        return parts.stream()
+                .map(PartResponse::from)
+                .toList();
+    }
+
+    /**
+     * 파트 수정
+     */
+    @Transactional
+    public PartResponse updatePart(Long partId, UpdatePartRequest request) {
+        Part part = partRepository.findById(partId)
+                .orElseThrow(() -> new PartException(PartErrorCode.PART_NOT_FOUND));
+
+        part.updatePart(request.partName(), request.description());
+
+        return PartResponse.from(part);
+    }
+
+    /**
+     * Discord 알림 로그 목록 조회
+     */
+    public List<DiscordNotificationLogResponse> getDiscordNotificationLogs() {
+        List<DiscordNotificationLog> logs = discordNotificationLogRepository.findAllByOrderByCreatedAtDesc();
+        return logs.stream()
+                .map(DiscordNotificationLogResponse::from)
+                .toList();
     }
 }
 
