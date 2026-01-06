@@ -17,7 +17,7 @@ import java.util.List;
 @Tag(name = "활동", description = "활동 관련 API")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/activities/intro")
+@RequestMapping("/api/v1/activities")
 public class ActivityController {
 
     private final ActivityService activityService;
