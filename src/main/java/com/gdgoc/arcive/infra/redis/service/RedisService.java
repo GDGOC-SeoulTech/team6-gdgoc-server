@@ -1,7 +1,8 @@
-package com.gdgoc.arcive.infra.redis;
+package com.gdgoc.arcive.infra.redis.service;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdgoc.arcive.infra.redis.exception.RedisException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -9,9 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.gdgoc.arcive.infra.redis.exception.RedisErrorCode.TYPE_MISMATCH;
+
 @RequiredArgsConstructor
 @Component
-public class RedisUtil {
+public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
@@ -48,7 +51,7 @@ public class RedisUtil {
         redisTemplate.delete(key);
 
         if (!type.isInstance(value)) {
-            throw new IllegalStateException("Redis value type mismatch.");
+            throw new RedisException(TYPE_MISMATCH);
         }
 
         return Optional.of(type.cast(value));

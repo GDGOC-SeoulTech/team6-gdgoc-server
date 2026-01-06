@@ -1,6 +1,7 @@
 package com.gdgoc.arcive.global.config;
 
 
+import com.gdgoc.arcive.global.config.properties.SecurityProperties;
 import com.gdgoc.arcive.global.security.jwt.filter.JwtAuthenticationFilter;
 import com.gdgoc.arcive.global.security.jwt.filter.JwtExceptionFilter;
 import com.gdgoc.arcive.global.security.jwt.handler.JwtAccessDeniedHandler;
@@ -33,17 +34,7 @@ public class SecurityConfig {
     private final JwtExceptionFilter jwtExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-
-    private final String[] whitelist = {
-            "/",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/login/oauth2/code/**",
-            "/api/v1/auth/token",
-            "/api/v1/parts/**",
-            "/api/v1/activities/**",
-            "/api/v1/sessions/**"
-    };
+    private final SecurityProperties securityProperties;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -56,8 +47,11 @@ public class SecurityConfig {
                 .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable).disable())
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(whitelist).permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(
+                                securityProperties.getWhitelist().toArray(new String[0])
+                        )
+                        .permitAll()  // 인증 없이 접근 가능
+                        .anyRequest().authenticated())  // 나머지는 JWT 인증 필요
                 .oauth2Login(oauth ->
                         oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
                                 .successHandler(oAuth2AuthenticationSuccessHandler)

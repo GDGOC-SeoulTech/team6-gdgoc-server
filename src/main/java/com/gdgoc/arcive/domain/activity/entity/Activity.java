@@ -23,9 +23,6 @@ public class Activity extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = false, length = 255)
-    private String title;
-
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 

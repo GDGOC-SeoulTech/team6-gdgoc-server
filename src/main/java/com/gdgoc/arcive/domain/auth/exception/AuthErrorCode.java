@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum AuthErrorCode implements BaseErrorCode {
 
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH-001", "잘못된 토큰입니다."),
-	TOKEN_NOT_FOUNT(HttpStatus.BAD_REQUEST, "AUTH-002", "토큰이 존재하지 않습니다.")
+	TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "AUTH-002", "토큰이 존재하지 않습니다.")
 	;
 
 	private final HttpStatus status;

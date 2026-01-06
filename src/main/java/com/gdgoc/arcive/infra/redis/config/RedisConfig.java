@@ -1,4 +1,4 @@
-package com.gdgoc.arcive.infra.redis;
+package com.gdgoc.arcive.infra.redis.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

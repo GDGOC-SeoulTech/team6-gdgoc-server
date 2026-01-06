@@ -40,4 +40,3 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "activity_id", nullable = false)
     private Activity activity;
 }
-

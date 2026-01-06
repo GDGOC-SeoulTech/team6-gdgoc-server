@@ -1,10 +1,11 @@
 package com.gdgoc.arcive.global.security.jwt.filter;
 
+import com.gdgoc.arcive.global.config.properties.SecurityProperties;
 import com.gdgoc.arcive.global.security.jwt.JwtTokenAuthenticator;
 import com.gdgoc.arcive.global.security.jwt.JwtTokenProvider;
 import com.gdgoc.arcive.global.security.jwt.exception.CustomJwtException;
 import com.gdgoc.arcive.global.security.jwt.exception.JwtErrorCode;
-import com.gdgoc.arcive.infra.redis.RedisUtil;
+import com.gdgoc.arcive.infra.redis.service.RedisService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -24,17 +26,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtTokenAuthenticator jwtTokenAuthenticator;
-	private final RedisUtil redisUtil;
+	private final RedisService redisService;
+	private final SecurityProperties securityProperties;
+	private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		String requestURI = request.getRequestURI();
+		return isWhitelisted(requestURI);
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 									FilterChain filterChain) throws ServletException, IOException {
-
 		String token = jwtTokenProvider.extractTokenFromHeader(request);
 
 		if (token != null) {
-			// 블랙리스트에 있는 토큰인지 확인
-			if (redisUtil.hasKey("blacklist:" + token)) {
+			// Redis 블랙리스트에 있는 토큰인지 확인
+			if (redisService.hasKey("blacklist:" + token)) {
 				throw new CustomJwtException(JwtErrorCode.TOKEN_REVOKED);
 			}
 
@@ -45,5 +54,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		filterChain.doFilter(request, response);
+	}
+
+	private boolean isWhitelisted(String requestURI) {
+		return securityProperties.getWhitelist().stream()
+				.anyMatch(pattern -> pathMatcher.match(pattern, requestURI));
 	}
 }

@@ -11,9 +11,6 @@ public record ActivityResponse(
         @Schema(description = "활동 이름", example = "GDGoC Solution Challenge")
         String name,
 
-        @Schema(description = "활동 제목", example = "Solution Challenge 2025")
-        String title,
-
         @Schema(description = "활동 설명", example = "GDGoc의 팀 프로젝트 대회입니다.")
         String description,
 
@@ -24,7 +21,6 @@ public record ActivityResponse(
         return new ActivityResponse(
                 activity.getId(),
                 activity.getName(),
-                activity.getTitle(),
                 activity.getDescription(),
                 activity.getImageUrl()
         );

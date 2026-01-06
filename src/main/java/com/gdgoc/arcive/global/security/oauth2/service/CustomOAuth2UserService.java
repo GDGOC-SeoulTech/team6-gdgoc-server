@@ -33,15 +33,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         Map<String, Object> originAttributes = oAuth2User.getAttributes();
         OAuthAttributes attributes = OAuthAttributes.of(socialType, nameAttributeKey, originAttributes);
-        Member member = getOrSave(attributes, socialType);
 
-        return new CustomOAuth2User(member.getEmail(), member.getId(), member.getRole());
-    }
-
-    private Member getOrSave(OAuthAttributes attributes, SocialType socialType) {
+        Member member;
         String socialId = attributes.getOAuth2UserInfo().getProviderId();
-        return memberRepository.findBySocialId(socialId)
-                .orElseGet(() -> memberRepository.save(attributes.toEntity(socialType)));
-
+        if (memberRepository.existsBySocialId(socialId)) {
+            member = memberRepository.findBySocialId(socialId).get();
+            return new CustomOAuth2User(member.getEmail(), member.getId(), member.getRole(), false);
+        } else {
+            member = memberRepository.save(attributes.toEntity(socialType));
+            return new CustomOAuth2User(member.getEmail(), member.getId(), member.getRole(), true);
+        }
     }
 }

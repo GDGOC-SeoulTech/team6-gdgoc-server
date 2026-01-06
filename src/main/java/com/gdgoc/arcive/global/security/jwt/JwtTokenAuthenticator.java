@@ -17,7 +17,8 @@ public class JwtTokenAuthenticator {
         CustomOAuth2User oAuth2User = new CustomOAuth2User(
                 jwtTokenProvider.getEmail(claims),
                 jwtTokenProvider.getId(claims),
-                jwtTokenProvider.getRole(claims)
+                jwtTokenProvider.getRole(claims),
+                false
         );
 
         // 인증용 객체 생성

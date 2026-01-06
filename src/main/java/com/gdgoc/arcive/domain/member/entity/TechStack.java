@@ -29,8 +29,10 @@ public class TechStack extends BaseEntity {
     @Column(nullable = false)
     private TechName name;
 
+    @Column(nullable = false)
+    private int score;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_profile_id", nullable = false)
     private MemberProfile memberProfile;
 }
-

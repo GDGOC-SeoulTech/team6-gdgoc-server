@@ -3,7 +3,7 @@ package com.gdgoc.arcive.global.security.oauth2.handler;
 import com.gdgoc.arcive.domain.member.entity.Role;
 import com.gdgoc.arcive.global.security.dto.TempTokenInfo;
 import com.gdgoc.arcive.global.security.oauth2.entity.CustomOAuth2User;
-import com.gdgoc.arcive.infra.redis.RedisUtil;
+import com.gdgoc.arcive.infra.redis.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +23,13 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${spring.security.oauth2.client.front-redirect-url}")
-    private String redirectUrl;
+    @Value("${spring.security.oauth2.client.existing-user-redirect-url}")
+    private String existingUserRedirectUrl;
 
-    private final RedisUtil redisUtil;
+    @Value("${spring.security.oauth2.client.new-user-redirect-url}")
+    private String newUserRedirectUrl;
+
+    private final RedisService redisService;
 
     private final Long tempTokenExpirationTime = 1200L;
 
@@ -50,12 +53,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 //                .toUriString();
 
         response.addHeader("Set-Cookie", cookie.toString());
-        response.sendRedirect(redirectUrl);
+
+        if (!principal.isNew()) {
+            response.sendRedirect(existingUserRedirectUrl);
+        } else {
+            response.sendRedirect(newUserRedirectUrl);
+        }
     }
 
     private String issueTempToken(String email, Long id, Role role) {
         String tempToken = UUID.randomUUID().toString();
-        redisUtil.saveValue(tempToken, new TempTokenInfo(email, id, role), tempTokenExpirationTime, TimeUnit.SECONDS);
+        redisService.saveValue(tempToken, new TempTokenInfo(email, id, role), tempTokenExpirationTime, TimeUnit.SECONDS);
         return tempToken;
     }
 }

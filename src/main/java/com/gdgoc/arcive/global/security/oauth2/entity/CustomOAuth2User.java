@@ -17,14 +17,16 @@ public class CustomOAuth2User extends DefaultOAuth2User {
     private final String email;
     private final Long id;
     private final Role role;
+    private final boolean isNew;
 
-    public CustomOAuth2User(String email, Long id, Role role) {
+    public CustomOAuth2User(String email, Long id, Role role, boolean isNew) {
         super(Collections.singletonList(new SimpleGrantedAuthority(role.name())),
                 Map.of("email", email),
                 "email");
         this.email = email;
         this.id = id;
         this.role = role;
+        this.isNew = isNew;
     }
 
     @Override

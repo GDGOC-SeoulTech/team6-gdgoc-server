@@ -22,7 +22,7 @@ public class SessionController {
     private final SessionService sessionService;
 
     @Operation(summary = "세션 소개 리스트 조회 [임채영]")
-    @GetMapping
+    @GetMapping("/intro")
     public ResponseEntity<ApiResponse<List<SessionResponse>>> getAllSessions(){
         return ResponseEntity.ok(ApiResponse.success(sessionService.getAllSessions()));
     }
