@@ -15,3 +15,9 @@ docker-compose.yml
 application-*.yml
 
 ADMIN-API-DEVELOPMENT.md
+
+# 테스트용 SQL 파일
+insert-dummy-*.sql
+
+# 빌드 산출물
+bin/
