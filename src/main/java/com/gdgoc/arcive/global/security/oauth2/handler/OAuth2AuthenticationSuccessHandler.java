@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -30,6 +31,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private String newUserRedirectUrl;
 
     private final RedisService redisService;
+    private final Environment environment;
 
     private final Long tempTokenExpirationTime = 1200L;
 
@@ -63,7 +65,28 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private String issueTempToken(String email, Long id, Role role) {
         String tempToken = UUID.randomUUID().toString();
-        redisService.saveValue(tempToken, new TempTokenInfo(email, id, role), tempTokenExpirationTime, TimeUnit.SECONDS);
+        // 로컬 개발 환경에서만 Redis 연결 실패 처리
+        if (isLocalProfile()) {
+            try {
+                redisService.saveValue(tempToken, new TempTokenInfo(email, id, role), tempTokenExpirationTime, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                log.warn("Redis 연결 실패로 tempToken 저장 실패. Redis가 실행 중인지 확인하세요. 에러: {}", e.getMessage());
+                // Redis 없이도 로그인은 진행되도록 함 (개발 환경용)
+            }
+        } else {
+            // 배포 환경에서는 Redis 저장 실패 시 예외 발생
+            redisService.saveValue(tempToken, new TempTokenInfo(email, id, role), tempTokenExpirationTime, TimeUnit.SECONDS);
+        }
         return tempToken;
+    }
+
+    private boolean isLocalProfile() {
+        String[] activeProfiles = environment.getActiveProfiles();
+        for (String profile : activeProfiles) {
+            if ("local".equals(profile)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

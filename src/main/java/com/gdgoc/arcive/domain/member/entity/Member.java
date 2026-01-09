@@ -44,4 +44,17 @@ public class Member extends BaseEntity {
         this.socialId = socialId;
         this.email = email;
     }
+
+    // Role 변경 메서드
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
+    // 승인 메서드 (PENDING -> MEMBER)
+    public void approve() {
+        if (this.role != Role.PENDING) {
+            throw new IllegalArgumentException("승인 대기 상태가 아닌 회원입니다.");
+        }
+        this.role = Role.MEMBER;
+    }
 }

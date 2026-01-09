@@ -29,4 +29,13 @@ public class Part extends BaseEntity {
     @OneToMany(mappedBy = "part", cascade = CascadeType.ALL)
     private List<Session> sessions = new ArrayList<>();
 
+    // 파트 수정 메서드
+    public void updatePart(String partName, String description) {
+        if (partName != null) {
+            this.partName = partName;
+        }
+        if (description != null) {
+            this.description = description;
+        }
+    }
 }
