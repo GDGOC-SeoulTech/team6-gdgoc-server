@@ -37,4 +37,16 @@ public class MemberProfile {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    public void updateOnboardingInfo(String name, String studentId, Major major, int generation) {
+        this.name = name;
+        this.studentId = studentId;
+        this.major = major;
+        this.generation = generation;
+    }
+
+    public void updateProfile(String bio, String profileImageUrl) {
+        this.bio = bio;
+        this.profileImageUrl = profileImageUrl;
+    }
 }
