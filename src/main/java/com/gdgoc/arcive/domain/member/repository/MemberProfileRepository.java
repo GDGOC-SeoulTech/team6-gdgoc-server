@@ -15,9 +15,9 @@ public interface MemberProfileRepository extends JpaRepository<MemberProfile, Lo
     @Query("SELECT mp FROM MemberProfile mp JOIN FETCH mp.member m")
     List<MemberProfile> findAllWithMember();
 
-    @Query("SELECT mp FROM MemberProfile mp JOIN FETCH mp.member m " +
+    @Query("SELECT mp FROM MemberProfile mp JOIN FETCH mp.member m LEFT JOIN FETCH mp.part p " +
             "WHERE (:generation IS NULL OR mp.generation = :generation) " +
-            "AND (:part IS NULL OR m.role = :part)")
+            "AND (:part IS NULL OR p.partName = :part)")
     List<MemberProfile> findByGenerationAndPart(@Param("generation") Integer generation,
                                                 @Param("part") String part);
 }

@@ -144,11 +144,7 @@ public class MemberService {
 
     private MemberDetailResponse convertToDetailResponse(MemberProfile profile) {
         Member member = profile.getMember();
-        String imageUrl = S3Util.buildImageUrlWithFilePath(
-                s3Properties.getS3().getUrlPrefix(),
-                s3Properties.getS3().getPaths().getDefaultProfileImage(),
-                profile.getProfileImageUrl()
-        );
+        String imageUrl = getProfileImageUrl(profile.getProfileImageUrl());
 
         return MemberDetailResponse.builder()
                 .id(member.getId())
@@ -164,13 +160,22 @@ public class MemberService {
                 .build();
     }
 
+    private String getProfileImageUrl(String imageUrl) {
+        return S3Util.buildImageUrlWithFilePath(
+                s3Properties.getS3().getUrlPrefix(),
+                s3Properties.getS3().getPaths().getDefaultProfileImage(),
+                imageUrl
+        );
+    }
+
     private MemberSummaryResponse convertToSummaryResponse(MemberProfile profile) {
         Member member = profile.getMember();
         return MemberSummaryResponse.builder()
                 .id(member.getId())
                 .name(profile.getName())
-                .profileImageUrl(profile.getProfileImageUrl())
+                .profileImageUrl(getProfileImageUrl(profile.getProfileImageUrl()))
                 .role(member.getRole().name())
+                .part(profile.getPart().getPartName())
                 .generation(profile.getGeneration())
                 .build();
     }
