@@ -19,5 +19,6 @@ public class MemberDetailResponse {
     private String bio;
     private String profileImageUrl;
     private String role;
+    private String part;
 }
 

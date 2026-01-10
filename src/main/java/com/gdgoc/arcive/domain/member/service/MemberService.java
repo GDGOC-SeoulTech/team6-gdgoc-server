@@ -1,20 +1,27 @@
 package com.gdgoc.arcive.domain.member.service;
 
 import com.gdgoc.arcive.domain.member.dto.*;
+import com.gdgoc.arcive.domain.member.entity.Major;
 import com.gdgoc.arcive.domain.member.entity.Member;
 import com.gdgoc.arcive.domain.member.entity.MemberProfile;
 import com.gdgoc.arcive.domain.member.exception.MemberErrorCode;
 import com.gdgoc.arcive.domain.member.exception.MemberException;
 import com.gdgoc.arcive.domain.member.repository.MemberRepository;
 import com.gdgoc.arcive.domain.member.repository.MemberProfileRepository;
+import com.gdgoc.arcive.domain.part.entity.Part;
+import com.gdgoc.arcive.domain.part.exception.PartErrorCode;
+import com.gdgoc.arcive.domain.part.exception.PartException;
+import com.gdgoc.arcive.domain.part.repository.PartRepository;
 import com.gdgoc.arcive.domain.project.dto.ProjectResponse;
 import com.gdgoc.arcive.domain.project.repository.ProjectMemberRepository;
 import com.gdgoc.arcive.infra.s3.config.S3Properties;
+import com.gdgoc.arcive.infra.s3.util.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +32,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberProfileRepository memberProfileRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final PartRepository partRepository;
     private final S3Properties s3Properties;
 
     @Transactional
@@ -32,30 +40,53 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        MemberProfile profile = memberProfileRepository.findByMemberIdWithMember(memberId)
-                .orElse(null);
+        Part part = partRepository.findByPartName(request.part())
+                .orElseThrow(() -> new PartException(PartErrorCode.PART_NOT_FOUND));
 
-        if (profile == null) {
-            // MemberProfile이 없으면 생성 (첫 온보딩)
-            String defaultProfileImageUrl = getDefaultProfileImageUrl();
-            profile = MemberProfile.create(
-                    member,
-                    request.getName(),
-                    request.getStudentId(),
-                    request.getMajor(),
-                    request.getGeneration(),
-                    defaultProfileImageUrl
-            );
-            memberProfileRepository.save(profile);
-        } else {
-            // MemberProfile이 있으면 업데이트
+        Major major = parseMajor(request.major());
+
+        String profileImageName = getRandomProfileImageName();
+
+        MemberProfile profile = memberProfileRepository.findByMemberIdWithMember(memberId)
+                .orElseGet(() -> createNewProfile(member, request, major, part, profileImageName));
+
+        if (profile.getId() != null) {
             profile.updateOnboardingInfo(
-                    request.getName(),
-                    request.getStudentId(),
-                    request.getMajor(),
-                    request.getGeneration()
+                    request.name(),
+                    request.studentId(),
+                    major,
+                    request.generation()
             );
+        } else {
+            memberProfileRepository.save(profile);
         }
+    }
+
+    private String getRandomProfileImageName() {
+        List<String> defaultProfileNames = List.of("fm_1.png", "fm_2.png", "fm_3.png", "fm_4.png", "fm_5.png",
+                "m_1.png", "m_2.png", "m_3.png", "m_4.png", "m_5.png");
+
+        return defaultProfileNames.get(ThreadLocalRandom.current().nextInt(defaultProfileNames.size()));
+    }
+
+    private Major parseMajor(String description) {
+        try {
+            return Major.fromDescription(description);
+        } catch (IllegalArgumentException e) {
+            throw new MemberException(MemberErrorCode.INVALID_MAJOR);
+        }
+    }
+
+    private MemberProfile createNewProfile(Member member, MemberOnboardingRequest request, Major major, Part part, String profileImageName) {
+        return MemberProfile.create(
+                member,
+                request.name(),
+                request.studentId(),
+                major,
+                part,
+                request.generation(),
+                getRandomProfileImageName()
+        );
     }
 
     @Transactional
@@ -113,19 +144,25 @@ public class MemberService {
 
     private MemberDetailResponse convertToDetailResponse(MemberProfile profile) {
         Member member = profile.getMember();
+        String imageUrl = S3Util.buildImageUrlWithFilePath(
+                s3Properties.getS3().getUrlPrefix(),
+                s3Properties.getS3().getPaths().getDefaultProfileImage(),
+                profile.getProfileImageUrl()
+        );
+
         return MemberDetailResponse.builder()
                 .id(member.getId())
                 .name(profile.getName())
                 .email(member.getEmail())
                 .studentId(profile.getStudentId())
-                .major(profile.getMajor())
+                .part(profile.getPart().getPartName())
+                .major(profile.getMajor().name())
                 .generation(profile.getGeneration())
                 .bio(profile.getBio())
-                .profileImageUrl(profile.getProfileImageUrl())
+                .profileImageUrl(imageUrl)
                 .role(member.getRole().name())
                 .build();
     }
-
 
     private MemberSummaryResponse convertToSummaryResponse(MemberProfile profile) {
         Member member = profile.getMember();
@@ -136,17 +173,5 @@ public class MemberService {
                 .role(member.getRole().name())
                 .generation(profile.getGeneration())
                 .build();
-    }
-
-    private String getDefaultProfileImageUrl() {
-        if (s3Properties.getS3() != null 
-                && s3Properties.getS3().getUrlPrefix() != null 
-                && s3Properties.getS3().getPaths() != null 
-                && s3Properties.getS3().getPaths().getDefaultFemaleProfileImage() != null) {
-            return s3Properties.getS3().getUrlPrefix() 
-                    + s3Properties.getS3().getPaths().getDefaultFemaleProfileImage();
-        }
-        // S3 설정이 없을 경우 빈 문자열 반환
-        return "";
     }
 }

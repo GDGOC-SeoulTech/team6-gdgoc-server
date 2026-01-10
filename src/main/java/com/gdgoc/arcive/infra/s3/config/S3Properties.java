@@ -39,7 +39,6 @@ public class S3Properties {
     @Getter
     @Setter
     public static class Paths {
-        private String defaultFemaleProfileImage;
-        private String defaultMaleProfileImage;
+        private String defaultProfileImage;
     }
 }

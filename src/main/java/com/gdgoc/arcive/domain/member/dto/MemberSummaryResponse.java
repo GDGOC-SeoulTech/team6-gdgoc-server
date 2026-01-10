@@ -15,4 +15,5 @@ public class MemberSummaryResponse {
     private String profileImageUrl;
     private String role;
     private int generation;
+    private String part;
 }
