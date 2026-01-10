@@ -28,5 +28,4 @@ public class Part extends BaseEntity {
 
     @OneToMany(mappedBy = "part", cascade = CascadeType.ALL)
     private List<Session> sessions = new ArrayList<>();
-
 }
