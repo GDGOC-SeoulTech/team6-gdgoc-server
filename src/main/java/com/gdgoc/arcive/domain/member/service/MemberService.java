@@ -152,7 +152,7 @@ public class MemberService {
                 .email(member.getEmail())
                 .studentId(profile.getStudentId())
                 .part(profile.getPart().getPartName())
-                .major(profile.getMajor().name())
+                .major(profile.getMajor().getDescription())
                 .generation(profile.getGeneration())
                 .bio(profile.getBio())
                 .profileImageUrl(imageUrl)
@@ -175,6 +175,7 @@ public class MemberService {
                 .name(profile.getName())
                 .profileImageUrl(getProfileImageUrl(profile.getProfileImageUrl()))
                 .role(member.getRole().name())
+                .major(profile.getMajor().getDescription())
                 .part(profile.getPart().getPartName())
                 .generation(profile.getGeneration())
                 .build();
