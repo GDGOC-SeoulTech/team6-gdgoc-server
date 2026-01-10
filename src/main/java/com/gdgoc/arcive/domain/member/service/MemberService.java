@@ -24,16 +24,32 @@ public class MemberService {
 
     @Transactional
     public void onboardMember(Long memberId, MemberOnboardingRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("MEMBER_NOT_FOUND"));
 
-        MemberProfile profile = findProfileByMemberIdOptimized(memberId);
+        MemberProfile profile = memberProfileRepository.findByMemberIdWithMember(memberId)
+                .orElse(null);
 
-
-        profile.updateOnboardingInfo(
-                request.getName(),
-                request.getStudentId(),
-                request.getMajor(),
-                request.getGeneration()
-        );
+        if (profile == null) {
+            // MemberProfile이 없으면 생성 (첫 온보딩)
+            profile = MemberProfile.create(
+                    member,
+                    request.getName(),
+                    request.getStudentId(),
+                    request.getMajor(),
+                    request.getGeneration(),
+                    "" // 기본 프로필 이미지 URL (나중에 업데이트 가능)
+            );
+            memberProfileRepository.save(profile);
+        } else {
+            // MemberProfile이 있으면 업데이트
+            profile.updateOnboardingInfo(
+                    request.getName(),
+                    request.getStudentId(),
+                    request.getMajor(),
+                    request.getGeneration()
+            );
+        }
     }
 
     @Transactional

@@ -48,4 +48,16 @@ public class MemberProfile {
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
     }
+
+    public static MemberProfile create(Member member, String name, String studentId, String major, int generation, String profileImageUrl) {
+        MemberProfile profile = new MemberProfile();
+        profile.member = member;
+        profile.name = name;
+        profile.studentId = studentId;
+        profile.major = major;
+        profile.generation = generation;
+        profile.profileImageUrl = profileImageUrl;
+        profile.bio = null;
+        return profile;
+    }
 }
