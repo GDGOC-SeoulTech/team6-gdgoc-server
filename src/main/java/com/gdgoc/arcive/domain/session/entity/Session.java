@@ -1,10 +1,11 @@
 package com.gdgoc.arcive.domain.session.entity;
 
-import com.gdgoc.arcive.domain.part.entity.Part; // 반드시 우리가 만든 Part를 import해야 합니다.
+import com.gdgoc.arcive.domain.part.entity.Part;
 import com.gdgoc.arcive.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
-import java.util.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -26,5 +27,8 @@ public class Session extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "part_id", nullable = false)
-    private Part part; // 이제 이 Part는 우리가 만든 엔티티로 인식됩니다.
+    private Part part;
+
+    @Column(name = "image_url", nullable = false, length = 255)
+    private String imageUrl;
 }

@@ -1,6 +1,7 @@
 package com.gdgoc.arcive.domain.activity.dto;
 
 import com.gdgoc.arcive.domain.activity.entity.Activity;
+import com.gdgoc.arcive.infra.s3.util.S3Util;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "활동 정보")
@@ -17,12 +18,12 @@ public record ActivityResponse(
         @Schema(description = "활동 이미지 URL", example = "https://example.com/image.jpg")
         String imageUrl
 ) {
-    public static ActivityResponse from(Activity activity) {
+    public static ActivityResponse from(Activity activity, String urlPrefix) {
         return new ActivityResponse(
                 activity.getId(),
                 activity.getName(),
                 activity.getDescription(),
-                activity.getImageUrl()
+                S3Util.buildImageUrl(urlPrefix, activity.getImageUrl())
         );
     }
 }
