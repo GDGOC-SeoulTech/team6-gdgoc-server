@@ -22,6 +22,7 @@ public class MemberProfile {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private Major major;
 
